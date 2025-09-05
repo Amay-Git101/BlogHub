@@ -1,8 +1,10 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, User, Edit, Trash2 } from "lucide-react";
+import { Calendar, User, Edit, Trash2, Bookmark } from "lucide-react";
 import { BlogPost } from "@/types/blog";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { cn } from "@/lib/utils";
+import { Link, useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -12,6 +14,10 @@ interface BlogCardProps {
 }
 
 const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
+  const { bookmarkedPostIds, toggleBookmark } = useBookmarks();
+  const navigate = useNavigate();
+  const isBookmarked = bookmarkedPostIds.has(post.id);
+
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -25,21 +31,28 @@ const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
     return content.substring(0, maxLength) + '...';
   };
 
+  const handleBookmarkClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleBookmark(post);
+  };
+
   return (
-    <Card className="h-full hover:shadow-md transition-shadow duration-200">
+    <Card 
+      onClick={() => onView(post)}
+      className="h-full flex flex-col hover:shadow-md transition-shadow duration-200 cursor-pointer"
+    >
       <CardHeader className="pb-3">
         <div className="space-y-2">
-          <h3 
-            className="text-xl font-semibold line-clamp-2 cursor-pointer hover:text-primary transition-colors"
-            onClick={() => onView(post)}
-          >
+          <h3 className="text-xl font-semibold line-clamp-2 hover:text-primary transition-colors">
             {post.title}
           </h3>
           
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
               <User className="h-3 w-3" />
-              <span>{post.author}</span>
+              <Link to={`/profile/${post.authorId}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                {post.author}
+              </Link>
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-3 w-3" />
@@ -49,7 +62,7 @@ const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
         </div>
       </CardHeader>
 
-      <CardContent className="pb-4">
+      <CardContent className="pb-4 flex-grow">
         <p className="text-muted-foreground line-clamp-3">
           {post.excerpt || truncateContent(post.content)}
         </p>
@@ -59,28 +72,19 @@ const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onView(post)}
+          onClick={(e) => { e.stopPropagation(); onView(post); }}
         >
           Read More
         </Button>
         
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           <Button
             variant="ghost"
-            size="sm"
-            onClick={() => onEdit(post)}
-            className="h-8 w-8 p-0"
+            size="icon"
+            onClick={handleBookmarkClick}
+            className="h-8 w-8"
           >
-            <Edit className="h-4 w-4" />
-          </Button>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onDelete(post.id)}
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
+            <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current text-primary")} />
           </Button>
         </div>
       </CardFooter>

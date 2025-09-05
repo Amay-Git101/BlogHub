@@ -6,35 +6,38 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BlogPost, BlogFormData } from "@/types/blog";
 import { Save, X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Define what the form itself will output
+type BlogFormValues = Omit<BlogFormData, "author" | "authorId">;
 
 interface BlogFormProps {
   post?: BlogPost | null;
-  onSave: (data: BlogFormData) => void;
+  onSave: (data: BlogFormValues) => void;
   onCancel: () => void;
   isEditing?: boolean;
 }
 
 const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) => {
-  const [formData, setFormData] = useState<BlogFormData>({
+  const [formData, setFormData] = useState<BlogFormValues>({
     title: "",
     content: "",
-    author: "",
   });
+  const { userProfile } = useAuth();
 
-  const [errors, setErrors] = useState<Partial<BlogFormData>>({});
+  const [errors, setErrors] = useState<Partial<BlogFormValues>>({});
 
   useEffect(() => {
     if (post) {
       setFormData({
         title: post.title,
         content: post.content,
-        author: post.author,
       });
     }
   }, [post]);
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<BlogFormData> = {};
+    const newErrors: Partial<BlogFormValues> = {};
 
     if (!formData.title.trim()) {
       newErrors.title = "Title is required";
@@ -42,10 +45,6 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
 
     if (!formData.content.trim()) {
       newErrors.content = "Content is required";
-    }
-
-    if (!formData.author.trim()) {
-      newErrors.author = "Author is required";
     }
 
     setErrors(newErrors);
@@ -60,10 +59,9 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
     }
   };
 
-  const handleInputChange = (field: keyof BlogFormData, value: string) => {
+  const handleInputChange = (field: keyof BlogFormValues, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -87,34 +85,27 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
       
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="Enter your blog post title..."
-                className={errors.title ? "border-destructive" : ""}
-              />
-              {errors.title && (
-                <p className="text-sm text-destructive">{errors.title}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="title">Title *</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              placeholder="Enter your blog post title..."
+              className={errors.title ? "border-destructive" : ""}
+            />
+            {errors.title && (
+              <p className="text-sm text-destructive">{errors.title}</p>
+            )}
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="author">Author *</Label>
-              <Input
-                id="author"
-                value={formData.author}
-                onChange={(e) => handleInputChange("author", e.target.value)}
-                placeholder="Your name..."
-                className={errors.author ? "border-destructive" : ""}
-              />
-              {errors.author && (
-                <p className="text-sm text-destructive">{errors.author}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label>Author</Label>
+            <Input
+              id="author"
+              value={userProfile?.name || "Loading..."}
+              disabled
+            />
           </div>
 
           <div className="space-y-2">

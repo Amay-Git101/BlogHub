@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, User, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Calendar, User, Edit, Trash2, Bookmark } from "lucide-react";
 import { BlogPost } from "@/types/blog";
+import CommentsSection from "./CommentsSection";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
+// This interface was missing
 interface BlogViewProps {
   post: BlogPost;
   onBack: () => void;
@@ -12,6 +17,9 @@ interface BlogViewProps {
 }
 
 const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
+  const { bookmarkedPostIds, toggleBookmark } = useBookmarks();
+  const isBookmarked = bookmarkedPostIds.has(post.id);
+  
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
@@ -46,12 +54,20 @@ const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
               <div className="flex gap-2 shrink-0">
                 <Button
                   variant="outline"
+                  size="icon"
+                  onClick={() => toggleBookmark(post)}
+                  className="h-9 w-9"
+                >
+                  <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current text-primary")} />
+                </Button>
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={onEdit}
                   className="flex items-center gap-2"
                 >
                   <Edit className="h-4 w-4" />
-                  Edit
+                  <span className="hidden sm:inline">Edit</span>
                 </Button>
                 
                 <Button
@@ -61,7 +77,7 @@ const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
                   className="flex items-center gap-2 text-destructive hover:text-destructive"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Delete
+                   <span className="hidden sm:inline">Delete</span>
                 </Button>
               </div>
             </div>
@@ -69,7 +85,9 @@ const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
             <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                <span className="font-medium">{post.author}</span>
+                <Link to={`/profile/${post.authorId}`} className="font-medium hover:underline">
+                  {post.author}
+                </Link>
               </div>
               
               <div className="flex items-center gap-2">
@@ -93,6 +111,10 @@ const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
             </div>
           </div>
         </CardContent>
+        
+        <CardFooter className="p-6 pt-0 border-t">
+          <CommentsSection postId={post.id} />
+        </CardFooter>
       </Card>
     </div>
   );
