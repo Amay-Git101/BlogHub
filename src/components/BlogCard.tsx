@@ -1,21 +1,20 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, User, Edit, Trash2, Bookmark } from "lucide-react";
+import { Calendar, User, Bookmark } from "lucide-react";
 import { BlogPost } from "@/types/blog";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface BlogCardProps {
   post: BlogPost;
-  onEdit: (post: BlogPost) => void;
-  onDelete: (id: string) => void;
   onView: (post: BlogPost) => void;
 }
 
-const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
+const BlogCard = ({ post, onView }: BlogCardProps) => {
   const { bookmarkedPostIds, toggleBookmark } = useBookmarks();
-  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const isBookmarked = bookmarkedPostIds.has(post.id);
 
   const formatDate = (date: Date) => {
@@ -39,11 +38,11 @@ const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
   return (
     <Card 
       onClick={() => onView(post)}
-      className="h-full flex flex-col hover:shadow-md transition-shadow duration-200 cursor-pointer"
+      className="h-full flex flex-col hover:shadow-lg dark:hover:shadow-dark-glow-lg transition-shadow duration-300 cursor-pointer"
     >
       <CardHeader className="pb-3">
         <div className="space-y-2">
-          <h3 className="text-xl font-semibold line-clamp-2 hover:text-primary transition-colors">
+          <h3 className="text-xl font-semibold line-clamp-2 text-primary">
             {post.title}
           </h3>
           
@@ -70,23 +69,23 @@ const BlogCard = ({ post, onEdit, onDelete, onView }: BlogCardProps) => {
 
       <CardFooter className="pt-0 flex justify-between items-center">
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
-          onClick={(e) => { e.stopPropagation(); onView(post); }}
         >
           Read More
         </Button>
         
-        <div className="flex gap-1">
+        {currentUser && (
           <Button
             variant="ghost"
             size="icon"
             onClick={handleBookmarkClick}
             className="h-8 w-8"
+            aria-label="Bookmark post"
           >
             <Bookmark className={cn("h-4 w-4", isBookmarked && "fill-current text-primary")} />
           </Button>
-        </div>
+        )}
       </CardFooter>
     </Card>
   );

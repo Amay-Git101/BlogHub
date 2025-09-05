@@ -6,6 +6,7 @@ import { BlogPost } from "@/types/blog";
 import BlogView from "@/components/BlogView";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { Skeleton } from "@/components/ui/skeleton";
+import BlogHeader from "@/components/BlogHeader";
 
 const Post = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -16,7 +17,10 @@ const Post = () => {
 
   useEffect(() => {
     const fetchPost = async () => {
-      if (!postId) return;
+      if (!postId) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       const docRef = doc(db, "posts", postId);
       const docSnap = await getDoc(docRef);
@@ -29,6 +33,9 @@ const Post = () => {
           createdAt: (data.createdAt as Timestamp)?.toDate() || new Date(),
           updatedAt: (data.updatedAt as Timestamp)?.toDate() || new Date(),
         } as BlogPost);
+      } else {
+        // Handle post not found
+        setPost(null);
       }
       setLoading(false);
     };
@@ -45,28 +52,33 @@ const Post = () => {
 
   if (loading) {
     return (
-       <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
-         <Skeleton className="h-10 w-1/4" />
-         <Skeleton className="h-16 w-full" />
-         <Skeleton className="h-6 w-3/4" />
-         <div className="pt-8 space-y-4">
-            <Skeleton className="h-48 w-full" />
-         </div>
-       </div>
+      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
+        <Skeleton className="h-10 w-1/4" />
+        <Skeleton className="h-16 w-full" />
+        <Skeleton className="h-6 w-3/4" />
+        <div className="pt-8 space-y-4">
+          <Skeleton className="h-48 w-full" />
+        </div>
+      </div>
     );
   }
 
   if (!post) {
-    return <div>Post not found.</div>;
+    return <div className="text-center py-10">Post not found.</div>;
   }
 
   return (
-    <BlogView
-      post={post}
-      onBack={() => navigate("/")}
-      onEdit={() => navigate(`/edit/${post.id}`)}
-      onDelete={handleDelete}
-    />
+    <>
+      <BlogHeader />
+      <div className="pb-24">
+        <BlogView
+          post={post}
+          onBack={() => navigate(-1)}
+          onEdit={() => navigate(`/edit/${post.id}`)}
+          onDelete={handleDelete}
+        />
+      </div>
+    </>
   );
 };
 

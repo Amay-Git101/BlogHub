@@ -3,12 +3,10 @@ import BlogCard from "./BlogCard";
 
 interface BlogListProps {
   posts: BlogPost[];
-  onEdit: (post: BlogPost) => void;
-  onDelete: (id: string) => void;
   onView: (post: BlogPost) => void;
 }
 
-const BlogList = ({ posts, onEdit, onDelete, onView }: BlogListProps) => {
+const BlogList = ({ posts, onView }: BlogListProps) => {
   if (posts.length === 0) {
     return (
       <div className="text-center py-16">
@@ -28,8 +26,6 @@ const BlogList = ({ posts, onEdit, onDelete, onView }: BlogListProps) => {
         <BlogCard
           key={post.id}
           post={post}
-          onEdit={onEdit}
-          onDelete={onDelete}
           onView={onView}
         />
       ))}
