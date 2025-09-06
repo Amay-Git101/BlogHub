@@ -16,8 +16,9 @@ import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
-import { useFollows } from "@/hooks/useFollows"; // <-- Import the new hook
+import { useFollows } from "@/hooks/useFollows";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -49,7 +50,27 @@ const Profile = () => {
       toast({ title: "Validation Error", description: "Name cannot be empty.", variant: "destructive" });
       return;
     }
-    // ... (rest of handleSave remains the same)
+
+    try {
+      // Update Firebase Auth profile
+      await updateProfile(currentUser, { displayName: formData.name });
+
+      // Update Firestore profile
+      const userDocRef = doc(db, "users", currentUser.uid);
+      await setDoc(userDocRef, { 
+        ...userProfile,
+        name: formData.name, 
+        bio: formData.bio,
+        profileComplete: true 
+      }, { merge: true });
+
+      refetchUserProfile();
+      setIsEditing(false);
+      toast({ title: "Success", description: "Profile updated successfully!" });
+    } catch (error) {
+      console.error("Error updating profile: ", error);
+      toast({ title: "Error", description: "Failed to update profile.", variant: "destructive" });
+    }
   };
 
   const handleCancel = () => {
@@ -68,10 +89,68 @@ const Profile = () => {
   const loading = authLoading || followLoading;
 
   if (loading || !userProfile || !currentUser) {
-    return <div>Loading...</div>; // Or a proper loading skeleton
+    return (
+        <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
+            <div className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-[250px]" />
+                    <Skeleton className="h-4 w-[200px]" />
+                </div>
+            </div>
+            <div className="space-y-4">
+                <Skeleton className="h-32 w-full" />
+                <Skeleton className="h-32 w-full" />
+            </div>
+        </div>
+    );
   }
 
-  // ... (isEditing view remains the same)
+  if (isEditing) {
+    return (
+        <div className="min-h-screen bg-background">
+            <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+                <div className="container mx-auto px-4 py-4">
+                    <h1 className="text-2xl font-bold text-foreground">
+                        {userProfile.profileComplete ? "Edit Profile" : "Complete Your Profile"}
+                    </h1>
+                </div>
+            </header>
+            <main className="container mx-auto px-4 py-8 max-w-2xl">
+                {!userProfile.profileComplete && (
+                    <Alert variant="default" className="mb-6">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription>
+                            Please complete your profile to continue to the blog.
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <Card>
+                    <CardContent className="p-6">
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Name</Label>
+                                <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" value={formData.email} disabled />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="bio">Bio</Label>
+                                <Textarea id="bio" value={formData.bio} onChange={(e) => setFormData({ ...formData, bio: e.target.value })} placeholder="Tell us about yourself..." />
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                                {userProfile.profileComplete && <Button variant="outline" onClick={handleCancel}>Cancel</Button>}
+                                <Button onClick={handleSave}>Save</Button>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </main>
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

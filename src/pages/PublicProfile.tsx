@@ -14,9 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Mail, Calendar, BookOpen, UserPlus, UserCheck } from "lucide-react";
 import BlogList from "@/components/BlogList";
-import BlogForm from "@/components/BlogForm"; // We might need this later
-import BlogView from "@/components/BlogView"; // We might need this later
-import { BlogPost, BlogFormData } from "@/types/blog";
+import { BlogPost } from "@/types/blog";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -27,7 +25,7 @@ const PublicProfile = () => {
   const [profile, setProfile] = useState<User | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const { posts, loading: loadingPosts, deletePost } = useBlogPosts(userId);
+  const { posts, loading: loadingPosts } = useBlogPosts(userId);
   const { followers, following, isFollowing, toggleFollow } = useFollows(userId);
 
   useEffect(() => {
@@ -52,7 +50,22 @@ const PublicProfile = () => {
   };
 
   if (loadingProfile || !profile) {
-    return <div>Loading profile...</div>; // Replace with a skeleton loader
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
+        <div className="flex items-center space-x-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+        <div className="grid gap-6 md:grid-cols-3">
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
   }
   
   const isOwnProfile = currentUser?.uid === profile.id;
@@ -125,9 +138,11 @@ const PublicProfile = () => {
 
         <h3 className="text-2xl font-bold mb-4">Posts by {profile.name}</h3>
         {loadingPosts ? (
-          <p>Loading posts...</p>
+           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+             {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-72 w-full" />)}
+           </div>
         ) : (
-          <BlogList posts={posts} onEdit={() => {}} onDelete={() => {}} onView={() => {}} />
+          <BlogList posts={posts} onView={(post: BlogPost) => navigate(`/post/${post.id}`)} />
         )}
       </main>
     </div>

@@ -1,15 +1,15 @@
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "./ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "./ui/dropdown-menu";
 import { Plus, Home, LogOut, User as UserIcon, LogIn, Bookmark } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/firebase";
+import { useAuth } from "../contexts/AuthContext";
+import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -42,6 +42,13 @@ const BlogHeader = () => {
           </Button>
         )}
 
+        {currentUser && (
+          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/bookmarks')}>
+            <Bookmark className="h-5 w-5" />
+            <span className="sr-only">Bookmarks</span>
+          </Button>
+        )}
+
         <ThemeToggle />
 
         {currentUser ? (
@@ -58,10 +65,6 @@ const BlogHeader = () => {
                <DropdownMenuItem onClick={() => navigate('/profile')}>
                 <UserIcon className="mr-2 h-4 w-4" />
                 <span>My Profile</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/bookmarks')}>
-                <Bookmark className="mr-2 h-4 w-4" />
-                <span>My Bookmarks</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
