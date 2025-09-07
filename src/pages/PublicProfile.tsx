@@ -4,11 +4,10 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/firebase";
 import { User } from "@/types/user";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Mail } from "lucide-react";
+import { Mail, Calendar } from "lucide-react";
 import BlogList from "@/components/BlogList";
 import { BlogPost } from "@/types/blog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,6 +42,10 @@ const PublicProfile = () => {
   const getInitials = (name?: string | null) => {
     if (!name) return "";
     return name.split(' ').map(word => word[0]).join('').toUpperCase();
+  };
+  
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(date);
   };
 
   if (loadingProfile || !profile) {
@@ -85,11 +88,13 @@ const PublicProfile = () => {
                 </div>
               </div>
               <Separator />
-              <div className="w-full text-center">
-                <div className="text-center">
-                  <p className="font-bold text-lg">{profile.postsCount}</p>
-                  <p className="text-xs text-muted-foreground">Posts</p>
-                </div>
+              <div className="text-center">
+                <p className="font-bold text-lg">{profile.postsCount}</p>
+                <p className="text-xs text-muted-foreground">Posts</p>
+              </div>
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                  <Calendar className="h-3 w-3" />
+                  <span>Member since {formatDate(profile.createdAt)}</span>
               </div>
             </div>
           </CardContent>

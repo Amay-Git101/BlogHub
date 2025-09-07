@@ -16,11 +16,13 @@ import {
   increment,
 } from "firebase/firestore";
 import { db } from "@/firebase";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const useBlogPosts = (authorId?: string) => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { refetchUserProfile } = useAuth(); // Get the refetch function
 
   useEffect(() => {
     setLoading(true);
@@ -67,12 +69,13 @@ export const useBlogPosts = (authorId?: string) => {
       batch.update(userDocRef, { postsCount: increment(1) });
 
       await batch.commit();
+      refetchUserProfile(); // Refresh user profile to update post count
       toast({ title: "Success", description: "Blog post created successfully!" });
     } catch (error) {
       console.error("Error creating post: ", error);
       toast({ title: "Error", description: "Failed to create post.", variant: "destructive" });
     }
-  }, [toast]);
+  }, [toast, refetchUserProfile]);
 
   const updatePost = useCallback(async (id: string, data: Partial<BlogFormData>) => {
     try {
@@ -109,13 +112,13 @@ export const useBlogPosts = (authorId?: string) => {
       }
 
       await batch.commit();
-
+      refetchUserProfile(); // Refresh user profile to update post count
       toast({ title: "Success", description: "Blog post deleted successfully!" });
     } catch (error) {
       console.error("Error deleting post: ", error);
       toast({ title: "Error", description: "Failed to delete post.", variant: "destructive" });
     }
-  }, [toast]);
+  }, [toast, refetchUserProfile]);
 
   return {
     posts,

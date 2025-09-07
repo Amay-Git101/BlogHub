@@ -7,17 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Edit, Mail, AlertTriangle } from "lucide-react";
+import { Edit, Mail, AlertTriangle, Calendar } from "lucide-react";
 import { UserFormData } from "@/types/user";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "@/firebase";
 import { updateProfile } from "firebase/auth";
 import { toast } from "@/components/ui/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
+import BlogList from "@/components/BlogList";
+import { BlogPost } from "@/types/blog";
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { currentUser, userProfile, refetchUserProfile, loading: authLoading } = useAuth();
+  const { posts, loading: postsLoading } = useBlogPosts(currentUser?.uid);
   
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<UserFormData>({
@@ -78,6 +84,10 @@ const Profile = () => {
     return name.split(' ').map(word => word[0]).join('').toUpperCase();
   };
   
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long' }).format(date);
+  };
+
   if (authLoading || !userProfile || !currentUser) {
     return (
         <div className="max-w-4xl mx-auto space-y-4">
@@ -142,7 +152,7 @@ const Profile = () => {
           Edit Profile
         </Button>
       </div>
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
         <Card className="md:col-span-1 glass-card">
           <CardContent className="p-6">
             <div className="flex flex-col items-center text-center space-y-4">
@@ -160,10 +170,14 @@ const Profile = () => {
                 </div>
               </div>
               <Separator />
-              <div className="w-full text-center">
-                <p className="font-bold text-lg">{userProfile.postsCount}</p>
-                <p className="text-xs text-muted-foreground">Posts</p>
-              </div>
+               <div className="text-center">
+                  <p className="font-bold text-lg">{userProfile.postsCount}</p>
+                  <p className="text-xs text-muted-foreground">Posts</p>
+                </div>
+                 <div className="flex items-center space-x-1 text-xs text-muted-foreground">
+                    <Calendar className="h-3 w-3" />
+                    <span>Member since {formatDate(userProfile.createdAt)}</span>
+                </div>
             </div>
           </CardContent>
         </Card>
@@ -178,6 +192,15 @@ const Profile = () => {
           </Card>
         </div>
       </div>
+
+      <h3 className="text-2xl font-bold mb-4 text-shadow-glow">My Posts</h3>
+        {postsLoading ? (
+           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+             {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-72 w-full" />)}
+           </div>
+        ) : (
+          <BlogList posts={posts} onView={(post: BlogPost) => navigate(`/post/${post.id}`)} />
+        )}
     </div>
   );
 };
