@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     if (docSnap.exists()) {
       const data = docSnap.data();
-      // Convert Firestore Timestamp to JavaScript Date object
       const createdAtDate = (data.createdAt as Timestamp)?.toDate() || new Date();
       
       setUserProfile({
@@ -54,7 +53,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         postsCount: 0,
         profileComplete: false,
       };
-      await setDoc(userDocRef, { ...newUserProfile, createdAt: serverTimestamp() });
+      await setDoc(userDocRef, {
+        id: newUserProfile.id,
+        name: newUserProfile.name,
+        email: newUserProfile.email,
+        postsCount: 0,
+        profileComplete: false,
+        createdAt: serverTimestamp() 
+      });
       setUserProfile(newUserProfile);
     }
   };

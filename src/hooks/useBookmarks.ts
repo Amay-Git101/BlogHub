@@ -36,18 +36,18 @@ export const useBookmarks = () => {
     const isBookmarked = bookmarkedPostIds.has(post.id);
 
     if (isBookmarked) {
-      // Remove bookmark
       const bookmarkToRemove = bookmarks.find(b => b.postId === post.id);
       if (bookmarkToRemove) {
         await deleteDoc(doc(db, "bookmarks", bookmarkToRemove.id));
       }
     } else {
-      // Add bookmark
       await addDoc(collection(db, "bookmarks"), {
         userId: currentUser.uid,
         postId: post.id,
         postTitle: post.title,
         postAuthor: post.author,
+        postContent: post.content,
+        postExcerpt: post.excerpt,
         createdAt: serverTimestamp(),
       });
     }

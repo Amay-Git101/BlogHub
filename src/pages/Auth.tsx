@@ -31,7 +31,7 @@ const Auth = () => {
         await signInWithEmailAndPassword(auth, email, password);
         toast({ title: "Success", description: "Logged in successfully!" });
       }
-      navigate("/");
+      navigate("/feed");
     } catch (err: any) {
       setError(err.message);
       toast({
@@ -47,7 +47,7 @@ const Auth = () => {
     try {
       await signInWithPopup(auth, provider);
       toast({ title: "Success", description: "Logged in successfully with Google!" });
-      navigate("/");
+      navigate("/feed");
     } catch (err: any) {
       setError(err.message);
       toast({
@@ -59,8 +59,8 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md mx-auto">
         <CardHeader>
           <CardTitle>{isSignUp ? "Create an Account" : "Welcome Back"}</CardTitle>
           <CardDescription>

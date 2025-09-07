@@ -4,31 +4,6 @@
 
 @layer base {
   :root {
-    /* New, refined Light Mode Theme */
-    --background: 220 20% 99%; /* Almost white with a hint of cool gray */
-    --foreground: 222.2 84% 4.9%;
-    --card: 220 20% 96%; /* Light gray for cards */
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    /* Dark theme remains the same */
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
     --card: 222.2 84% 4.9%;
@@ -48,6 +23,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 217.2 91.2% 59.8%;
+    --radius: 0.5rem;
   }
 
   body {
@@ -55,9 +31,24 @@
   }
 }
 
-/* Custom CSS for glassmorphism card effect */
 @layer utilities {
+  .aurora-bg {
+    background-image: radial-gradient(
+        ellipse 80% 80% at 50% -20%,
+        hsl(var(--primary) / 0.3),
+        transparent
+      ),
+      radial-gradient(
+        ellipse 80% 80% at 50% 120%,
+        hsl(var(--accent) / 0.3),
+        transparent
+      );
+    background-repeat: no-repeat;
+    background-size: 400% 400%;
+    animation: aurora 20s linear infinite;
+  }
+
   .glass-card {
-    @apply bg-black/20 backdrop-blur-sm border border-white/10 rounded-xl;
+    @apply bg-card/50 backdrop-blur-lg border border-border/50 rounded-2xl shadow-xl;
   }
 }

@@ -5,14 +5,15 @@ import {
   collection,
   query,
   onSnapshot,
-  addDoc,
   updateDoc,
-  deleteDoc,
   doc,
   serverTimestamp,
   orderBy,
   where,
-  Timestamp
+  Timestamp,
+  writeBatch,
+  getDoc,
+  increment,
 } from "firebase/firestore";
 import { db } from "@/firebase";
 
@@ -25,14 +26,12 @@ export const useBlogPosts = (authorId?: string) => {
     setLoading(true);
     let q;
     if (authorId) {
-      // Query for a specific author's posts
       q = query(
         collection(db, "posts"),
         where("authorId", "==", authorId),
         orderBy("createdAt", "desc")
       );
     } else {
-      // Query for all posts
       q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
     }
 
@@ -55,11 +54,19 @@ export const useBlogPosts = (authorId?: string) => {
 
   const createPost = useCallback(async (data: BlogFormData) => {
     try {
-      await addDoc(collection(db, "posts"), {
+      const batch = writeBatch(db);
+      
+      const newPostRef = doc(collection(db, "posts"));
+      batch.set(newPostRef, {
         ...data,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
+
+      const userDocRef = doc(db, "users", data.authorId);
+      batch.update(userDocRef, { postsCount: increment(1) });
+
+      await batch.commit();
       toast({ title: "Success", description: "Blog post created successfully!" });
     } catch (error) {
       console.error("Error creating post: ", error);
@@ -82,7 +89,27 @@ export const useBlogPosts = (authorId?: string) => {
 
   const deletePost = useCallback(async (id: string) => {
     try {
-      await deleteDoc(doc(db, "posts", id));
+      const postDocRef = doc(db, "posts", id);
+      const postSnap = await getDoc(postDocRef);
+
+      if (!postSnap.exists()) {
+        throw new Error("Post does not exist");
+      }
+      
+      const postData = postSnap.data();
+      const authorId = postData.authorId;
+
+      const batch = writeBatch(db);
+      
+      batch.delete(postDocRef);
+
+      if (authorId) {
+        const userDocRef = doc(db, "users", authorId);
+        batch.update(userDocRef, { postsCount: increment(-1) });
+      }
+
+      await batch.commit();
+
       toast({ title: "Success", description: "Blog post deleted successfully!" });
     } catch (error) {
       console.error("Error deleting post: ", error);

@@ -43,11 +43,11 @@ const BlogView = ({ post, onBack, onEdit, onDelete }: BlogViewProps) => {
         </Button>
       </div>
 
-      <Card>
+      <Card className="glass-card">
         <CardHeader className="pb-6">
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-4">
-              <h1 className="text-3xl font-bold leading-tight">
+              <h1 className="text-3xl font-bold leading-tight text-shadow-glow">
                 {post.title}
               </h1>
               

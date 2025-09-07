@@ -6,7 +6,6 @@ import { BlogPost } from "@/types/blog";
 import BlogView from "@/components/BlogView";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 import { Skeleton } from "@/components/ui/skeleton";
-import BlogHeader from "@/components/BlogHeader";
 
 const Post = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -34,7 +33,6 @@ const Post = () => {
           updatedAt: (data.updatedAt as Timestamp)?.toDate() || new Date(),
         } as BlogPost);
       } else {
-        // Handle post not found
         setPost(null);
       }
       setLoading(false);
@@ -46,13 +44,13 @@ const Post = () => {
   const handleDelete = async () => {
     if (post) {
       await deletePost(post.id);
-      navigate("/");
+      navigate("/feed");
     }
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl space-y-4">
+      <div className="max-w-4xl mx-auto space-y-4 glass-card p-6">
         <Skeleton className="h-10 w-1/4" />
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-6 w-3/4" />
@@ -64,21 +62,16 @@ const Post = () => {
   }
 
   if (!post) {
-    return <div className="text-center py-10">Post not found.</div>;
+    return <div className="text-center py-10 glass-card">Post not found.</div>;
   }
 
   return (
-    <>
-      <BlogHeader />
-      <div className="pb-24">
-        <BlogView
-          post={post}
-          onBack={() => navigate(-1)}
-          onEdit={() => navigate(`/edit/${post.id}`)}
-          onDelete={handleDelete}
-        />
-      </div>
-    </>
+    <BlogView
+      post={post}
+      onBack={() => navigate(-1)}
+      onEdit={() => navigate(`/edit/${post.id}`)}
+      onDelete={handleDelete}
+    />
   );
 };
 

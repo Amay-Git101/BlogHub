@@ -8,7 +8,6 @@ import { BlogPost, BlogFormData } from "@/types/blog";
 import { Save, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Define what the form itself will output
 type BlogFormValues = Omit<BlogFormData, "author" | "authorId">;
 
 interface BlogFormProps {
@@ -24,7 +23,6 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
     content: "",
   });
   const { userProfile } = useAuth();
-
   const [errors, setErrors] = useState<Partial<BlogFormValues>>({});
 
   useEffect(() => {
@@ -38,22 +36,14 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
 
   const validateForm = (): boolean => {
     const newErrors: Partial<BlogFormValues> = {};
-
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!formData.content.trim()) {
-      newErrors.content = "Content is required";
-    }
-
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.content.trim()) newErrors.content = "Content is required";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (validateForm()) {
       onSave(formData);
     }
@@ -61,25 +51,16 @@ const BlogForm = ({ post, onSave, onCancel, isEditing = false }: BlogFormProps) 
 
   const handleInputChange = (field: keyof BlogFormValues, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-4xl mx-auto glass-card">
       <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+        <CardTitle className="flex items-center justify-between text-shadow-glow">
           <span>{isEditing ? "Edit Post" : "Create New Post"}</span>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onCancel}
-            className="h-8 w-8 p-0"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </CardTitle>
       </CardHeader>
       

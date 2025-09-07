@@ -7,8 +7,6 @@ export interface User {
   createdAt: Date;
   postsCount: number;
   profileComplete: boolean;
-  followersCount?: number;
-  followingCount?: number;
 }
 
 export interface UserFormData {

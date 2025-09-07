@@ -6,12 +6,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Plus, Home, LogOut, User as UserIcon, LogIn, Bookmark } from "lucide-react";
+import { Plus, Home, LogOut, User as UserIcon, LogIn, Bookmark, LayoutGrid } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { auth } from "../firebase";
 import { signOut } from "firebase/auth";
-import { ThemeToggle } from "./ThemeToggle";
 
 const BlogHeader = () => {
   const navigate = useNavigate();
@@ -35,6 +34,11 @@ const BlogHeader = () => {
           <span className="sr-only">Home</span>
         </Button>
 
+        <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/feed')}>
+          <LayoutGrid className="h-5 w-5" />
+          <span className="sr-only">Blogs</span>
+        </Button>
+
         {currentUser && (
           <Button variant="ghost" size="icon" className="rounded-full" onClick={() => navigate('/create')}>
             <Plus className="h-5 w-5" />
@@ -48,8 +52,6 @@ const BlogHeader = () => {
             <span className="sr-only">Bookmarks</span>
           </Button>
         )}
-
-        <ThemeToggle />
 
         {currentUser ? (
           <DropdownMenu>

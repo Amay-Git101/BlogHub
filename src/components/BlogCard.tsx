@@ -4,7 +4,7 @@ import { Calendar, User, Bookmark } from "lucide-react";
 import { BlogPost } from "@/types/blog";
 import { useBookmarks } from "@/hooks/useBookmarks";
 import { cn } from "@/lib/utils";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface BlogCardProps {
@@ -38,7 +38,7 @@ const BlogCard = ({ post, onView }: BlogCardProps) => {
   return (
     <Card 
       onClick={() => onView(post)}
-      className="h-full flex flex-col hover:shadow-lg dark:hover:shadow-dark-glow-lg transition-shadow duration-300 cursor-pointer"
+      className="h-full flex flex-col glass-card transition-all duration-300 cursor-pointer hover:border-primary/50 hover:shadow-primary/20"
     >
       <CardHeader className="pb-3">
         <div className="space-y-2">
